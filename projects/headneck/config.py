@@ -22,15 +22,15 @@ config["dataset_minh_normalize"] = ["original_minh_normalize", "preprocessed_min
                                     "test_minh_normalize"]
 config["original_folder"] = ["original_bak"]
 config["project_name"] = "3DUnetCNN_BRATS"
-config["brats_folder"] = "brats"
-config["dataset_folder"] = "dataset"
-config["template_data_folder"] = "data_train"
+config["brats_folder"] = "projects/headneck"
+config["dataset_folder"] = "projects/database"
+config["template_data_folder"] = "database/data_train"
 config["template_folder"] = "19991011"
 
 # config_unet["image_shape"] = (240, 240, 155)  # This determines what shape the images will be cropped/resampled to.
 # This determines what shape the images will be cropped/resampled to.
 # config["image_shape"] = (160, 192, 128)
-config["image_shape"] = (264, 264, 128)
+config["image_shape"] = (256, 256, 128)
 # config["is_create_patch_index_list_original"] = False
 
 
@@ -61,7 +61,7 @@ config_unet["n_base_filters"] = 16
 
 config_unet["batch_size"] = 1
 config_unet["validation_batch_size"] = 2
-config_unet["n_epochs"] = 300  # cutoff the training after this many epochs
+config_unet["n_epochs"] = 200  # cutoff the training after this many epochs
 # learning rate will be reduced after this many epochs if the validation loss is not improving
 # config_unet["patience"] = 10
 config_unet["patience"] = 25

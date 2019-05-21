@@ -95,7 +95,7 @@ def train_model(experiment, model, model_file, training_generator, validation_ge
     :return: 
     """
     if experiment == None:
-        history = model.fit_generator(generator=training_generator,
+        history = model.fit_generator(workers=0, generator=training_generator,
                                       steps_per_epoch=steps_per_epoch,
                                       epochs=n_epochs,
                                       validation_data=validation_generator,
@@ -109,7 +109,7 @@ def train_model(experiment, model, model_file, training_generator, validation_ge
                                                               early_stopping_patience=early_stopping_patience))
     else:
         with experiment.train():
-            history = model.fit_generator(generator=training_generator,
+            history = model.fit_generator(workers=0, generator=training_generator,
                                           steps_per_epoch=steps_per_epoch,
                                           epochs=n_epochs,
                                           validation_data=validation_generator,
