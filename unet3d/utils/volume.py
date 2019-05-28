@@ -12,6 +12,8 @@ from nilearn.masking import compute_multi_background_mask
 from unet3d.utils.path_utils import get_modality
 from brats.config import config
 
+import unet3d.utils.path_utils as path_utils
+
 
 def get_shape(volume):
     return volume.shape
@@ -101,31 +103,33 @@ def get_filename_without_extenstion(path):
     return filename.replace(".nii.gz", "")
 
 
-def get_truth_path(volume_path):
+def get_truth_path(volume_path, truth_name="truth"):
     volume_filename = get_filename_without_extenstion(volume_path)
-    truth_path = volume_path.replace(volume_filename, config["truth"][0])
+    parent_path = path_utils.get_parent_dir(volume_path) 
+    truth_name = truth_name
+    truth_path = os.path.join(parent_path, truth_name + ".nii.gz")
     return truth_path
 
 
-def get_volume_paths(truth_path):
+def get_volume_paths(truth_path, truth="truth_name"):
     volume_paths = list()
     for modality in config["training_modalities"]:
-        volume_path = truth_path.replace(config["truth"][0], modality)
+        volume_path = truth_path.replace(truth, modality)
         volume_paths.append(volume_path)
     return volume_paths
 
 
-def get_volume_paths_from_one_volume(volume_path):
+def get_volume_paths_from_one_volume(volume_path, training=["T1"]):
     volume_paths = list()
     volume_modality = get_modality(volume_path)
-    for modality in config["training_modalities"]:
+    for modality in training:
         temp_path = volume_path.replace(volume_modality, modality)
         volume_paths.append(temp_path)
     return volume_paths
 
 
-def is_truth_path(path):
-    if config["truth"][0] in path:
+def is_truth_path(path, truth_name="truth"):
+    if truth_name in path:
         return True
     else:
         return False     

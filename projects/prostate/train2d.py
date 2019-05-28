@@ -10,8 +10,8 @@ from comet_ml import Experiment
 # to compute memory consumption ----------------------------------
 
 
-from projects.headneck.prepare_data import prepare_data
-from projects.headneck.config import config, config_dict, config_unet
+from projects.prostate.prepare_data import prepare_data
+from projects.prostate.config import config, config_dict, config_unet
 
 from unet3d.utils.print_utils import print_processing, print_section, print_separator
 
@@ -253,7 +253,7 @@ def train(args):
 
 def main():
     global config
-    args = get_args.train2d_headneck()
+    args = get_args.train2d_prostate()
 
     config = path_utils.update_is_augment(args, config)
 

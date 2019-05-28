@@ -22,19 +22,19 @@ config["dataset_minh_normalize"] = ["original_minh_normalize", "preprocessed_min
                                     "test_minh_normalize"]
 config["original_folder"] = ["original_bak"]
 config["project_name"] = "3DUnetCNN_BRATS"
-config["brats_folder"] = "projects/headneck"
+config["brats_folder"] = "projects/prostate"
 config["dataset_folder"] = "projects/headneck/database"
 config["template_data_folder"] = "database/data_train"
-config["template_folder"] = "19991011"
+config["template_folder"] = "0a2c62cd7028 Brandi Purvis"
 
 # config_unet["image_shape"] = (240, 240, 155)  # This determines what shape the images will be cropped/resampled to.
 # This determines what shape the images will be cropped/resampled to.
 # config["image_shape"] = (160, 192, 128)
-config["image_shape"] = (256, 256, 64)
+config["image_shape"] = (512, 512, 256)
 # config["is_create_patch_index_list_original"] = False
 
 
-config["labels"] = (1, 2, 3, 4, 5, 6)  # the label numbers on the input image
+config["labels"] = (1, 2, 3)  # the label numbers on the input image
 # config["labels"] = (0, 1, 2, 4)  # the label numbers on the input image
 config["n_labels"] = len(config["labels"])
 
@@ -59,9 +59,9 @@ config_unet["deconvolution"] = True
 config_unet["depth"] = 4
 config_unet["n_base_filters"] = 16
 
-config_unet["batch_size"] = 10
-config_unet["validation_batch_size"] = 10
-config_unet["n_epochs"] = 200  # cutoff the training after this many epochs
+config_unet["batch_size"] = 1
+config_unet["validation_batch_size"] = 2
+config_unet["n_epochs"] = 10  # cutoff the training after this many epochs
 # learning rate will be reduced after this many epochs if the validation loss is not improving
 # config_unet["patience"] = 10
 config_unet["patience"] = 200
@@ -101,7 +101,7 @@ config["skip_blank"] = True
 
 # Dictionary
 config_dict = dict()
-config_dict["challenge"] = ["headneck"]
+config_dict["challenge"] = ["prostate"]
 config_dict["year"] = [2018, 2019]
 config_dict["model"] = ["unet", "isensee", "mnet", "unet_vae", "segnet"]
 config_dict["model"] = config_dict["model"] + ["casnet_v1", "casnet_v2", "casnet_v3", "casnet_v4", "casnet_v5", "casnet_v6", "casnet_v7", "casnet_v8"]
