@@ -23,14 +23,14 @@ config["dataset_minh_normalize"] = ["original_minh_normalize", "preprocessed_min
 config["original_folder"] = ["original_bak"]
 config["project_name"] = "3DUnetCNN_BRATS"
 config["brats_folder"] = "projects/prostate"
-config["dataset_folder"] = "projects/headneck/database"
+config["dataset_folder"] = "projects/prostate/database"
 config["template_data_folder"] = "database/data_train"
 config["template_folder"] = "0a2c62cd7028 Brandi Purvis"
 
 # config_unet["image_shape"] = (240, 240, 155)  # This determines what shape the images will be cropped/resampled to.
 # This determines what shape the images will be cropped/resampled to.
 # config["image_shape"] = (160, 192, 128)
-config["image_shape"] = (512, 512, 256)
+config["image_shape"] = (256, 256, 128)
 # config["is_create_patch_index_list_original"] = False
 
 
@@ -61,13 +61,13 @@ config_unet["n_base_filters"] = 16
 
 config_unet["batch_size"] = 1
 config_unet["validation_batch_size"] = 2
-config_unet["n_epochs"] = 10  # cutoff the training after this many epochs
+config_unet["n_epochs"] = 30  # cutoff the training after this many epochs
 # learning rate will be reduced after this many epochs if the validation loss is not improving
 # config_unet["patience"] = 10
 config_unet["patience"] = 200
 # training will be stopped after this many epochs without the validation loss improving
 config_unet["early_stop"] = 300
-config_unet["initial_learning_rate"] = 1e-2 # factor by which the learning rate will be reduced
+config_unet["initial_learning_rate"] = 1e-5 # factor by which the learning rate will be reduced
 config_unet["learning_rate_drop"] = 0.5 # portion of the data that will be used for training
 # config_unet["learning_rate_epochs"] = 1
 config_unet["validation_split"] = 0.8 # if > 0, during training, validation patches will be overlapping

@@ -60,7 +60,7 @@ def prepare_data(args):
     print("save to", data_file_path)
 
     #dataset = get_dataset(is_test=args.is_test, is_denoise=args.is_denoise)
-    dataset = "/media/guus/Secondary/Data"
+    dataset = "/media/guus/Secondary/Data_prostate_256_256_128"
     print("reading folder:", dataset)
 
     if args.overwrite or not os.path.exists(data_file_path):
@@ -79,11 +79,11 @@ def main():
     args = get_args.prepare_data_prostate()
 
     args.is_test = "0"
-    for is_denoise in config_dict["is_denoise"]:
+    for is_denoise in ["0"]:
         args.is_denoise = is_denoise
-        for is_normalize in config_dict["is_normalize"]:
+        for is_normalize in ["z"]:
             args.is_normalize = is_normalize
-            for is_hist_match in ["0", "1"]:
+            for is_hist_match in ["0"]:
                 args.is_hist_match = is_hist_match
                 if is_normalize == "z" and is_hist_match == "1":
                     continue

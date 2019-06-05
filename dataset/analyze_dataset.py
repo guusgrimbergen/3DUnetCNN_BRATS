@@ -80,7 +80,7 @@ def analyze_one_folder(data_folder, dataset, config, overwrite=False):
         writer = pd.ExcelWriter(analysis_file_path)
 
         data_dir = os.path.join(analysis_dir, dataset)
-        subject_dirs = glob.glob(os.path.join(data_dir, "*", "*.nii.gz"))
+        subject_dirs = glob.glob(os.path.join(data_dir, "*", "Prostate.nii.gz"))
 
         index = range(0, len(subject_dirs)-1, 1)
         df = pd.DataFrame(index=index, columns=columns)
@@ -98,18 +98,18 @@ def analyze_one_folder(data_folder, dataset, config, overwrite=False):
             df["folder"][i] = folder
             df["name"][i] = name
             df["modality"][i] = modality
-            df["size"][i] = get_size(subject_dir)
-            df["shape"][i] = get_shape(volume)
+            #df["size"][i] = get_size(subject_dir)
+            #df["shape"][i] = get_shape(volume)
             df["bounding_box"][i] = get_bounding_box(volume)
-            df["size_bounding_box"][i] = get_size_bounding_box(volume)
+            #df["size_bounding_box"][i] = get_size_bounding_box(volume)
             df["n_non_zeros_pixel"][i] = get_non_zeros_pixel(volume)
-            df["n_zeros_pixel"][i] = get_zeros_pixel(volume)
-            df["mean_non_zeros_pixel"][i] = compute_mean_non_zeros_pixel(
-                volume)
-            df["std_non_zeros_pixel"][i] = compute_std_non_zeros_pixel(volume)
-            df["max_intensity"][i], df["min_intensity"][i], df["min_intensity_non_zeros"][i] = get_max_min_intensity(
-                volume)
-
+            #df["n_zeros_pixel"][i] = get_zeros_pixel(volume)
+            #df["mean_non_zeros_pixel"][i] = compute_mean_non_zeros_pixel(
+            #    volume)
+            #df["std_non_zeros_pixel"][i] = compute_std_non_zeros_pixel(volume)
+            #df["max_intensity"][i], df["min_intensity"][i], df["min_intensity_non_zeros"][i] = get_max_min_intensity(
+            #    volume)
+            '''
             if "valid" not in data_folder:
                 if not is_truth_path(subject_dir, truth_name=config["truth"][0]):
                     truth_path = get_truth_path(
@@ -124,13 +124,13 @@ def analyze_one_folder(data_folder, dataset, config, overwrite=False):
                     df["n_occurrences_label"][i] = count_number_occurrences_label(
                         volume)
                     df["n_unique_label"][i] = get_unique_label(volume)
-
+            '''
         df.to_excel(writer, 'Sheet1')
         writer.save()
 
 
 def main():
-    args = get_args.train_headneck()
+    args = get_args.train_prostate()
     dataset = "original"
     data_folder = "data_train"
     overwrite = True
@@ -144,6 +144,8 @@ def main():
         from projects.ibsr.config import config
     elif challenge == "headneck":
         from projects.headneck.config import config
+    elif challenge == "prostate":
+        from projects.prostate.config import config
 
     CURRENT_WORKING_DIR = os.path.realpath(__file__)
     PROJECT_DIR = get_project_dir(CURRENT_WORKING_DIR, config["project_name"])

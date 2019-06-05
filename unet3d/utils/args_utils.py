@@ -373,7 +373,7 @@ def prepare_data_prostate():
                         default=2018, choices=config_dict["year"],
                         help="year of challenge")
     parser.add_argument('-is', '--image_shape', type=str,
-                        default="512-512-256", choices=config_dict["image_shape"],
+                        default="256-256-128", choices=config_dict["image_shape"],
                         help="image shape to read")
     parser.add_argument('-r', '--crop', type=str,
                         default="0")
@@ -395,7 +395,7 @@ def train_prostate():
                         default=2018, choices=config_dict["year"],
                         help="year of challenge")
     parser.add_argument('-is', '--image_shape', type=str,
-                        default="512-512-256", choices=config_dict["image_shape"],
+                        default="256-256-128", choices=config_dict["image_shape"],
                         help="image shape to read")
     parser.add_argument('-ps', '--patch_shape', type=str,
                         default="128-128-128",
@@ -425,7 +425,7 @@ def train2d_prostate():
                         default=2018, choices=config_dict["year"],
                         help="year of challenge")
     parser.add_argument('-is', '--image_shape', type=str,
-                        default="512-512-256", choices=config_dict["image_shape"],
+                        default="256-256-128", choices=config_dict["image_shape"],
                         help="image shape to read")
     parser.add_argument('-ps', '--patch_shape', type=str,
                         default="256-128-1",

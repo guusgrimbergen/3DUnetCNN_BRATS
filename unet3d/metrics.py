@@ -24,7 +24,7 @@ def dice_coefficient_loss(y_true, y_pred):
     return -dice_coefficient(y_true, y_pred)
 
 
-def weighted_dice_coefficient_old(y_true, y_pred, smooth=0.00001):
+def weighted_dice_coefficient(y_true, y_pred, smooth=0.00001):
     """
     Weighted dice coefficient. Default axis assumes a "channels first" data structure
     :param smooth:
@@ -45,7 +45,7 @@ def weighted_dice_coefficient_old(y_true, y_pred, smooth=0.00001):
                                                                                axis=axis) + smooth))
 
 
-def weighted_dice_coefficient(y_true, y_pred, labels=config["labels"], weights=[1, 1, 1, 1, 1, 1]):
+def weighted_dice_coefficient_old(y_true, y_pred, labels=config["labels"], weights=[1, 1, 1]):
     distance = 0
     for label in range(len(labels)):
         dice_coef_class = dice_coefficient(y_true[:, label], y_pred[:, label])

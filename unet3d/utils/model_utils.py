@@ -7,6 +7,8 @@ from keras.layers import Input, LeakyReLU, Add, UpSampling3D, Activation, Spatia
 from keras.engine import Model
 from keras.optimizers import Adam, Adadelta
 
+from keras.losses import categorical_crossentropy
+
 from unet3d.metrics import weighted_dice_coefficient_loss
 from unet3d.metrics import tversky_loss
 from unet3d.metrics import minh_dice_coef_loss
@@ -131,7 +133,10 @@ def compile_model(model, loss_function="weighted",
                                     }
                       )
     else:
+        # model.compile(optimizer=Adam(lr=initial_learning_rate, beta_1=0.9, beta_2=0.999),
+        #               loss=loss, metrics=[metrics])
         model.compile(optimizer=Adam(lr=initial_learning_rate, beta_1=0.9, beta_2=0.999),
-                      loss=loss, metrics=[metrics])
+                      loss=loss)
+
 
     return model
