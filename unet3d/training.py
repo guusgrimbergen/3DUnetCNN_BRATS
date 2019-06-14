@@ -4,7 +4,6 @@ from functools import partial
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint, CSVLogger, LearningRateScheduler, ReduceLROnPlateau, EarlyStopping
 from keras.models import load_model
-
 from unet3d.metrics import (dice_coefficient, dice_coefficient_loss, dice_coef, dice_coef_loss,
                             weighted_dice_coefficient_loss, weighted_dice_coefficient, minh_dice_coef_loss,
                             tversky_loss, focal_loss, ignore_unknown_xentropy, minh_dice_coef_metric,
@@ -59,7 +58,7 @@ def load_old_model(model_file):
                       'tv_weighted_loss': tv_weighted_loss
                       }
     try:
-        from keras_contrib.layers import InstanceNormalization
+        from keras_contrib.layers.normalization.instancenormalization import InstanceNormalization
         custom_objects["InstanceNormalization"] = InstanceNormalization
     except ImportError:
         pass

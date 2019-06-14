@@ -61,13 +61,13 @@ config_unet["n_base_filters"] = 16
 
 config_unet["batch_size"] = 1
 config_unet["validation_batch_size"] = 2
-config_unet["n_epochs"] = 30  # cutoff the training after this many epochs
+config_unet["n_epochs"] = 20  # cutoff the training after this many epochs
 # learning rate will be reduced after this many epochs if the validation loss is not improving
 # config_unet["patience"] = 10
 config_unet["patience"] = 200
 # training will be stopped after this many epochs without the validation loss improving
 config_unet["early_stop"] = 300
-config_unet["initial_learning_rate"] = 1e-5 # factor by which the learning rate will be reduced
+config_unet["initial_learning_rate"] = 1e-3 # factor by which the learning rate will be reduced
 config_unet["learning_rate_drop"] = 0.5 # portion of the data that will be used for training
 # config_unet["learning_rate_epochs"] = 1
 config_unet["validation_split"] = 0.8 # if > 0, during training, validation patches will be overlapping
@@ -90,9 +90,9 @@ config["augment_shear"] = False
 config["augment_zoom"] = False
 config["n_augment"] = 0
 
-config["flip"] = True  # augments the data by randomly flipping an axis during
+config["flip"] = False  # augments the data by randomly flipping an axis during
 # data shape must be a cube. Augments the data by permuting in various directions
-config["permute"] = False
+config["permute"] = True
 config["distort"] = None  # switch to None if you want no distortion
 config["augment"] = config["flip"] or config["distort"]
 # if True, then patches without any target will be skipped

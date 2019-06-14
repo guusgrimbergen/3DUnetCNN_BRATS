@@ -6,8 +6,9 @@ import pprint
 import numpy as np
 
 from unet3d.data import write_data_to_file, open_data_file
-from unet2d.generator import get_training_and_validation_and_testing_generators2d
-from unet2d.model import unet_model_2d, isensee2d_model, densefcn_model_2d
+# from unet2d.generator import get_training_and_validation_and_testing_generators2d
+from engine.generator import get_training_and_validation_and_testing_generators2d
+from unet2d.model import *
 from unet3d.training import load_old_model, train_model
 from unet3d.utils.path_utils import get_project_dir, get_h5_training_dir, get_model_h5_filename
 from unet3d.utils.path_utils import get_training_h5_filename, get_shape_string, get_shape_from_string
@@ -21,6 +22,7 @@ import unet3d.utils.args_utils as get_args
 
 from projects.ibsr.prepare_data import prepare_data
 from projects.ibsr.config import config, config_dict, config_unet
+
 
 config.update(config_unet)
 
@@ -60,7 +62,6 @@ def train(args):
         testing_keys_file=config["testing_file"],
         n_labels=config["n_labels"],
         labels=config["labels"],
-        patch_overlap=[0,0,0],
         patch_shape=config["patch_shape"],
         validation_patch_overlap=config["validation_patch_overlap"],
         training_patch_start_offset=config["training_patch_start_offset"],
@@ -72,7 +73,8 @@ def train(args):
         augment_shear=config["augment_shear"],
         augment_zoom=config["augment_zoom"],
         n_augment=config["n_augment"],
-        skip_blank=config["skip_blank"],
+        skip_blank=False,
+        patch_overlap=[0, 0, 0],
         project="ibsr")
 
     print("-"*60)
@@ -83,8 +85,7 @@ def train(args):
     if not args.overwrite and os.path.exists(config["model_file"]):
         print("load old model")
         from unet3d.utils.model_utils import generate_model
-        model = generate_model(
-            config["model_file"], loss_function=args.loss)
+        model = generate_model(config["model_file"], loss_function=args.loss, labels=config["labels"])
         # model = load_old_model(config["model_file"])
     else:
         if args.model == "unet":
@@ -95,17 +96,17 @@ def train(args):
                                   deconvolution=config["deconvolution"],
                                   depth=args.depth_unet,
                                   n_base_filters=args.n_base_filters_unet,
-                                  loss_function=args.loss)
-        elif args.model == "densefcn":
-            model = densefcn_model_2d(input_shape=config["input_shape"],
-                                      classes=config["n_labels"],
-                                      initial_learning_rate=config["initial_learning_rate"],
-                                      nb_dense_block=4,
-                                      nb_layers_per_block=4,
-                                      early_transition=True,
-                                      dropout_rate=0.4,
-                                      loss_function=args.loss)
-
+                                  loss_function=args.loss,
+                                  labels=config["labels"])
+        elif args.model == "segnet":
+            print("init segnet model")
+            model = segnet2d(input_shape=config["input_shape"],
+                             n_labels=config["n_labels"],
+                             initial_learning_rate=config["initial_learning_rate"],
+                             depth=args.depth_unet,
+                             n_base_filters=args.n_base_filters_unet,
+                             loss_function=args.loss,
+                             labels=config["labels"])
         else:
             raise ValueError("Model is NotImplemented. Please check")
 
@@ -118,13 +119,11 @@ def train(args):
 
     if args.is_test == "0":
         experiment = Experiment(api_key="AgTGwIoRULRgnfVR5M8mZ5AfS",
-                                project_name="train",
+                                project_name="ibsr18",
                                 workspace="vuhoangminh")
     else:
         experiment = None
 
-    if args.model == "isensee":
-        config["initial_learning_rate"] = 1e-6
     print(config["initial_learning_rate"], config["learning_rate_drop"])
     train_model(experiment=experiment,
                 model=model,
@@ -137,7 +136,9 @@ def train(args):
                 learning_rate_drop=config["learning_rate_drop"],
                 learning_rate_patience=config["patience"],
                 early_stopping_patience=config["early_stop"],
-                n_epochs=config["n_epochs"]
+                n_epochs=config["n_epochs"],
+                workers=args.workers,
+                max_queue_size=128                
                 )
 
     if args.is_test == "0":
@@ -161,6 +162,7 @@ def main():
         prepare_data(args)
 
     train(args)
+
 
 if __name__ == "__main__":
     main()

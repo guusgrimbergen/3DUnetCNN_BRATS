@@ -1,23 +1,22 @@
 from comet_ml import Experiment
+from unet3d.utils.print_utils import print_section
+from projects.ibsr.config import config, config_dict, config_unet
+from projects.ibsr.prepare_data import prepare_data
+import unet3d.utils.args_utils as get_args
+import unet3d.utils.path_utils as path_utils
+import unet3d.utils.print_utils as print_utils
+from unet3d.training import train_model
+from unet3d.model import *
+# from unet3d.generator import get_training_and_validation_and_testing_generators
+from engine.generator import get_training_and_validation_and_testing_generators3d
+from unet3d.data import open_data_file
 
 import os
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-from unet3d.data import open_data_file
-from unet3d.generator import get_training_and_validation_and_testing_generators
-from unet3d.model import unet_model_3d, simple_model_3d, eye_model_3d, mnet_model_3d, multiscale_unet_model_3d
-from unet3d.model import isensee2017_model
-from unet3d.model import densefcn_model_3d
-from unet3d.model import dense_unet_3d, res_unet_3d, se_unet_3d
-from unet3d.training import train_model
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"  # run on server
 
-import unet3d.utils.print_utils as print_utils
-import unet3d.utils.path_utils as path_utils
-import unet3d.utils.args_utils as get_args
-
-from projects.ibsr.prepare_data import prepare_data
-from projects.ibsr.config import config, config_dict, config_unet
 
 config.update(config_unet)
 
@@ -46,7 +45,7 @@ def train(args):
     data_file_opened = open_data_file(config["data_file"])
 
     print_utils.print_section("get training and testing generators")
-    train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_and_testing_generators(
+    train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_and_testing_generators3d(
         data_file_opened,
         batch_size=args.batch_size,
         validation_batch_size=args.batch_size,
@@ -68,7 +67,7 @@ def train(args):
         augment_shear=config["augment_shear"],
         augment_zoom=config["augment_zoom"],
         n_augment=config["n_augment"],
-        skip_blank=config["skip_blank"],
+        skip_blank=False,
         project="ibsr")
 
     print("-"*60)
@@ -77,7 +76,8 @@ def train(args):
     if not args.overwrite and os.path.exists(config["model_file"]):
         print("load old model")
         from unet3d.utils.model_utils import generate_model
-        model = generate_model(config["model_file"], loss_function=args.loss)
+        model = generate_model(
+            config["model_file"], loss_function=args.loss, labels=config["labels"])
         # model = load_old_model(config["model_file"])
     else:
         # instantiate new model
@@ -90,14 +90,20 @@ def train(args):
                                   deconvolution=config["deconvolution"],
                                   depth=args.depth_unet,
                                   n_base_filters=args.n_base_filters_unet,
-                                  loss_function=args.loss)
-
+                                  loss_function=args.loss,
+                                  labels=config["labels"])
+        elif args.model == "segnet":
+            print("init segnet model")
+            model = segnet3d(input_shape=config["input_shape"],
+                             pool_size=config["pool_size"],
+                             n_labels=config["n_labels"],
+                             initial_learning_rate=config["initial_learning_rate"],
+                             depth=args.depth_unet,
+                             n_base_filters=args.n_base_filters_unet,
+                             loss_function=args.loss,
+                             labels=config["labels"])
         else:
-            print("init isensee model")
-            model = isensee2017_model(input_shape=config["input_shape"],
-                                      n_labels=config["n_labels"],
-                                      initial_learning_rate=config["initial_learning_rate"],
-                                      loss_function=args.loss)
+            raise ValueError("Model is NotImplemented. Please check")
 
     model.summary()
 
@@ -108,7 +114,7 @@ def train(args):
 
     if args.is_test == "0":
         experiment = Experiment(api_key="AgTGwIoRULRgnfVR5M8mZ5AfS",
-                                project_name="train",
+                                project_name="ibsr18",
                                 workspace="vuhoangminh")
     else:
         experiment = None
@@ -136,7 +142,10 @@ def train(args):
                 learning_rate_drop=config["learning_rate_drop"],
                 learning_rate_patience=config["patience"],
                 early_stopping_patience=config["early_stop"],
-                n_epochs=config["n_epochs"]
+                n_epochs=config["n_epochs"],
+                workers=1,
+                max_queue_size=2,
+                use_multiprocessing=False
                 )
 
     if args.is_test == "0":
@@ -150,15 +159,16 @@ def train(args):
 def main():
     global config
     args = get_args.train_ibsr()
-    
+
     config = path_utils.update_is_augment(args, config)
-    
+
     data_path, _, _, _, _ = path_utils.get_training_h5_paths(BRATS_DIR, args)
 
     if args.overwrite or not os.path.exists(data_path):
         prepare_data(args)
 
     train(args)
+
 
 if __name__ == "__main__":
     main()

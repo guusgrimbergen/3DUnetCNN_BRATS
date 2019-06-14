@@ -22,19 +22,19 @@ config["dataset_minh_normalize"] = ["original_minh_normalize", "preprocessed_min
                                     "test_minh_normalize"]
 config["original_folder"] = ["original_bak"]
 config["project_name"] = "3DUnetCNN_BRATS"
-config["brats_folder"] = "projects/headneck"
-config["dataset_folder"] = "projects/headneck/database"
+config["brats_folder"] = "projects/miccai"
+config["dataset_folder"] = "projects/miccai/database"
 config["template_data_folder"] = "database/data_train"
-config["template_folder"] = "19991011"
+config["template_folder"] = "0522c0001"
 
 # config_unet["image_shape"] = (240, 240, 155)  # This determines what shape the images will be cropped/resampled to.
 # This determines what shape the images will be cropped/resampled to.
 # config["image_shape"] = (160, 192, 128)
-config["image_shape"] = (256, 256, 64)
+config["image_shape"] = (512, 512, 128)
 # config["is_create_patch_index_list_original"] = False
 
 
-config["labels"] = (1, 2, 3, 4, 5, 6)  # the label numbers on the input image
+config["labels"] = (1, 2, 3, 4, 6, 9)  # the label numbers on the input image
 # config["labels"] = (0, 1, 2, 4)  # the label numbers on the input image
 config["n_labels"] = len(config["labels"])
 
@@ -56,7 +56,7 @@ else:
 config_unet["truth_channel"] = config["nb_channels"]
 # if False, will use upsampling instead of deconvolution
 config_unet["deconvolution"] = True
-config_unet["depth"] = 3
+config_unet["depth"] = 4
 config_unet["n_base_filters"] = 16
 
 config_unet["batch_size"] = 1
@@ -64,10 +64,10 @@ config_unet["validation_batch_size"] = 2
 config_unet["n_epochs"] = 100  # cutoff the training after this many epochs
 # learning rate will be reduced after this many epochs if the validation loss is not improving
 # config_unet["patience"] = 10
-config_unet["patience"] = 60
+config_unet["patience"] = 100
 # training will be stopped after this many epochs without the validation loss improving
-config_unet["early_stop"] = 300
-config_unet["initial_learning_rate"] = 1e-2 # factor by which the learning rate will be reduced
+config_unet["early_stop"] = 100
+config_unet["initial_learning_rate"] = 1e-4 # factor by which the learning rate will be reduced
 config_unet["learning_rate_drop"] = 0.5 # portion of the data that will be used for training
 # config_unet["learning_rate_epochs"] = 1
 config_unet["validation_split"] = 0.8 # if > 0, during training, validation patches will be overlapping
@@ -80,17 +80,17 @@ config_unet["is_create_patch_index_list_original"] = True
 
 config["augment_flipud"] = False
 # config["augment_fliplr"] = True
-config["augment_fliplr"] = False
+config["augment_fliplr"] = True
 # config["augment_elastic"] = True
 config["augment_elastic"] = False
-config["augment_rotation"] = False
+config["augment_rotation"] = True
 # config["augment_rotation"] = True
 config["augment_shift"] = False
 config["augment_shear"] = False
 config["augment_zoom"] = False
 config["n_augment"] = 0
 
-config["flip"] = True  # augments the data by randomly flipping an axis during
+config["flip"] = False  # augments the data by randomly flipping an axis during
 # data shape must be a cube. Augments the data by permuting in various directions
 config["permute"] = False
 config["distort"] = None  # switch to None if you want no distortion
@@ -101,7 +101,7 @@ config["skip_blank"] = True
 
 # Dictionary
 config_dict = dict()
-config_dict["challenge"] = ["headneck"]
+config_dict["challenge"] = ["miccai"]
 config_dict["year"] = [2018, 2019]
 config_dict["model"] = ["unet", "isensee", "mnet", "unet_vae", "segnet"]
 config_dict["model"] = config_dict["model"] + ["casnet_v1", "casnet_v2", "casnet_v3", "casnet_v4", "casnet_v5", "casnet_v6", "casnet_v7", "casnet_v8"]

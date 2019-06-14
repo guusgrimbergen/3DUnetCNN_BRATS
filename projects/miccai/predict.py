@@ -10,7 +10,7 @@ from unet3d.utils.path_utils import get_shape_from_string
 from unet3d.utils.path_utils import get_filename_without_extension
 from unet3d.utils.path_utils import make_dir
 
-from brats.config import config, config_unet, config_dict
+from projects.miccai.config import config, config_unet, config_dict
 config.update(config_unet)
 
 
@@ -54,7 +54,7 @@ def predict(args, prediction_dir="desktop"):
         if prediction_dir == "SERVER":
             prediction_dir = "brats"
         else:
-            prediction_dir = "/mnt/sda/3DUnetCNN_BRATS/brats"
+            prediction_dir = "/media/guus/Secondary/3DUnetCNN_BRATS/projects/miccai"
 
         config["prediction_folder"] = os.path.join(
             prediction_dir, "database/prediction", get_filename_without_extension(config["model_file"]))
@@ -100,7 +100,7 @@ def predict(args, prediction_dir="desktop"):
 
 
 def main():
-    args = get_args.train25d()
+    args = get_args.train_miccai()
 
     depth_unet = args.depth_unet
     n_base_filters_unet = args.n_base_filters_unet
@@ -110,13 +110,13 @@ def main():
     is_hist_match = args.is_hist_match
     loss = args.loss
 
-    header = ("dice_WholeTumor", "dice_TumorCore", "dice_EnhancingTumor")
+    header = ("dice_Prostate", "dice_Bladder", "dice_Rectum")
     model_scores = list()
     model_ids = list()
 
     for is_augment in ["1"]:
         args.is_augment = is_augment
-        for model_name in ["casnet_v2"]:
+        for model_name in ["unet"]:
             args.model = model_name
             for is_denoise in ["0"]:
                 args.is_denoise = is_denoise
@@ -126,7 +126,7 @@ def main():
                         args.is_hist_match = is_hist_match
                         for loss in ["weighted"]:
                             args.loss = loss
-                            for patch_shape in ["160-192-1"]:
+                            for patch_shape in ["256-256-1"]:
                                 args.patch_shape = patch_shape
                                 args.model_dim = 2
 

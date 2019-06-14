@@ -1,6 +1,6 @@
 from comet_ml import Experiment
-from projects.headneck.prepare_data import prepare_data
-from projects.headneck.config import config, config_dict, config_unet
+from projects.miccai.prepare_data import prepare_data
+from projects.miccai.config import config, config_dict, config_unet
 import unet3d.utils.path_utils as path_utils
 import unet3d.utils.args_utils as get_args
 from unet3d.utils.print_utils import print_section, print_separator
@@ -72,7 +72,7 @@ def train(args):
         augment_zoom=config["augment_zoom"],
         n_augment=config["n_augment"],
         skip_blank=config["skip_blank"],
-        project="headneck")
+        project="miccai")
 
     print("-"*60)
     print("# Load or init model")
@@ -164,7 +164,7 @@ def train(args):
 
 def main():
     global config
-    args = get_args.train_headneck()
+    args = get_args.train_miccai()
 
     config = path_utils.update_is_augment(args, config)
 

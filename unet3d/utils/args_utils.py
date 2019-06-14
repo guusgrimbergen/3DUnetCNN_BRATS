@@ -20,7 +20,7 @@ def parent_train_parser():
     parser.add_argument('-m', '--model', type=str,
                         default="unet", choices=config_dict["model"])
     parser.add_argument('-du', '--depth_unet', type=int,
-                        default=4, choices=config_dict["depth_unet"])
+                        default=3, choices=config_dict["depth_unet"])
     parser.add_argument('-nb', '--n_base_filters_unet', type=int,
                         default=16,
                         )
@@ -347,10 +347,10 @@ def train2d_headneck():
                         default="256-256-64", choices=config_dict["image_shape"],
                         help="image shape to read")
     parser.add_argument('-ps', '--patch_shape', type=str,
-                        default="256-128-1",
+                        default="256-256-1",
                         help="patch shape to train")
     parser.add_argument('-ba', '--batch_size', type=int,
-                        default=64,
+                        default=32,
                         help="train batch size")
     parser.add_argument('-r', '--crop', type=str,
                         default="0", choices=config_dict["crop"])
@@ -432,6 +432,87 @@ def train2d_prostate():
                         help="patch shape to train")
     parser.add_argument('-ba', '--batch_size', type=int,
                         default=64,
+                        help="train batch size")
+    parser.add_argument('-r', '--crop', type=str,
+                        default="0", choices=config_dict["crop"])
+    parser.add_argument('-b', '--is_bias_correction', type=str,
+                        default="0", choices=config_dict["is_bias_correction"],
+                        help="perform bias field removal?")
+    parser.add_argument('-dim', '--model_dim', type=int,
+                        default=2)                        
+    args = parser.parse_args()
+    return args
+
+def prepare_data_miccai():
+    parent_parser = parent_prepare_parser()
+    parser = argparse.ArgumentParser(
+        parents=[parent_parser], description='Data preparation')
+    parser.add_argument('-c', '--challenge', type=str,
+                        default="miccai",
+                        help="challenge name")
+    parser.add_argument('-y', '--year', type=str,
+                        default=2018, choices=config_dict["year"],
+                        help="year of challenge")
+    parser.add_argument('-is', '--image_shape', type=str,
+                        default="512-512-128", choices=config_dict["image_shape"],
+                        help="image shape to read")
+    parser.add_argument('-r', '--crop', type=str,
+                        default="0")
+    parser.add_argument('-b', '--is_bias_correction', type=str,
+                        default="0", choices=config_dict["is_bias_correction"],
+                        help="perform bias field removal?")
+    args = parser.parse_args()
+    return args
+
+
+def train_miccai():
+    parent_parser = parent_train_parser()
+    parser = argparse.ArgumentParser(
+        parents=[parent_parser], description='Finetuning')
+    parser.add_argument('-c', '--challenge', type=str,
+                        default="miccai", choices=config_dict["challenge"],
+                        help="challenge name")
+    parser.add_argument('-y', '--year', type=str,
+                        default=2018, choices=config_dict["year"],
+                        help="year of challenge")
+    parser.add_argument('-is', '--image_shape', type=str,
+                        default="512-512-128", choices=config_dict["image_shape"],
+                        help="image shape to read")
+    parser.add_argument('-ps', '--patch_shape', type=str,
+                        default="128-128-128",
+                        help="patch shape to train")
+    parser.add_argument('-ba', '--batch_size', type=int,
+                        default=1,
+                        help="train batch size")
+    parser.add_argument('-r', '--crop', type=str,
+                        default="0", choices=config_dict["crop"])
+    parser.add_argument('-b', '--is_bias_correction', type=str,
+                        default="0", choices=config_dict["is_bias_correction"],
+                        help="perform bias field removal?")
+    parser.add_argument('-dim', '--model_dim', type=int,
+                        default=3)                        
+    args = parser.parse_args()
+    return args
+
+
+def train2d_miccai():
+    parent_parser = parent_train_parser()
+    parser = argparse.ArgumentParser(
+        parents=[parent_parser], description='Finetuning')
+    parser.add_argument('-c', '--challenge', type=str,
+                        default="miccai", choices=config_dict["challenge"],
+                        help="challenge name")
+    parser.add_argument('-y', '--year', type=str,
+                        default=2018, choices=config_dict["year"],
+                        help="year of challenge")
+    parser.add_argument('-is', '--image_shape', type=str,
+                        default="512-512-128", choices=config_dict["image_shape"],
+                        help="image shape to read")
+    parser.add_argument('-ps', '--patch_shape', type=str,
+                        default="512-512-1",
+                        help="patch shape to train")
+    parser.add_argument('-ba', '--batch_size', type=int,
+                        default=8,
                         help="train batch size")
     parser.add_argument('-r', '--crop', type=str,
                         default="0", choices=config_dict["crop"])

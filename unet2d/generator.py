@@ -116,45 +116,19 @@ def get_training_and_validation_and_testing_generators2d(data_file, batch_size, 
     # Set the number of training and testing samples per epoch correctly
     print(">> compute number of training and validation steps")
 
-    # if project=="ibsr":
-    #     if patch_shape==(32,32,1):
-    #         num_training_steps = get_number_of_steps(20367,batch_size)
-    #         num_validation_steps = get_number_of_steps(10439,validation_batch_size)
-    #     elif patch_shape==(64,64,1):
-    #         num_training_steps = get_number_of_steps(7591,batch_size)
-    #         num_validation_steps = get_number_of_steps(3850,validation_batch_size)
-    #     else:
-    #         num_training_steps = get_number_of_steps(1400,batch_size)
-    #         num_validation_steps = get_number_of_steps(760,validation_batch_size)
-    # else:
 
-    # num_training_steps = get_number_of_steps(get_number_of_patches2d(data_file, training_list, patch_shape,
-    #                                                                  patch_start_offset=training_patch_start_offset,
-    #                                                                  patch_overlap=patch_overlap,
-    #                                                                  data_type_generator=data_type_generator),
-    #                                          batch_size)
-    # num_validation_steps = get_number_of_steps(get_number_of_patches2d(data_file, validation_list, patch_shape,
-    #                                                                    patch_overlap=0,
-    #                                                                    data_type_generator=data_type_generator),
-    #                                            validation_batch_size)
 
-    # else:
-    #     # num_training_steps = get_number_of_steps(11137, batch_size)
+    num_training_steps = get_number_of_steps(get_number_of_patches2d(data_file, training_list, patch_shape,
+                                                                      patch_start_offset=training_patch_start_offset,
+                                                                      patch_overlap=patch_overlap,
+                                                                      data_type_generator=data_type_generator),
+                                              batch_size)
+    num_validation_steps = get_number_of_steps(get_number_of_patches2d(data_file, validation_list, patch_shape,
+                                                                        patch_overlap=0,
+                                                                        data_type_generator=data_type_generator),
+                                                validation_batch_size)
 
-    # num_training_steps = get_number_of_steps(5576, batch_size)
-    # num_validation_steps = get_number_of_steps(2794, validation_batch_size)
 
-    # print("Number of training steps: ", num_training_steps)
-    # print("Number of validation steps: ", num_validation_steps)
-
-    # from unet3d.generator import get_number_of_patches
-    num_training_steps = get_number_of_steps(get_number_of_patches(data_file, training_list, patch_shape,
-                                                                   patch_start_offset=training_patch_start_offset,
-                                                                   patch_overlap=patch_overlap),
-                                             batch_size)
-    num_validation_steps = get_number_of_steps(get_number_of_patches(data_file, validation_list, patch_shape,
-                                                                     patch_overlap=validation_patch_overlap),
-                                               validation_batch_size)
 
     print("Number of training steps: ", num_training_steps)
     print("Number of validation steps: ", num_validation_steps)
@@ -347,11 +321,11 @@ def add_data2d(x_list, y_list, data_file, index, patch_shape=None,
     truth = truth[np.newaxis]
 
     # change here to feed more samples
-    # is_added = False
-    # if np.any(truth != 0):
-    #     is_added = True
+    is_added = False
+    if np.any(truth != 0):
+        is_added = True
 
-    is_added = True
+    # is_added = True
     # change here to feed more samples
 
     if is_added:

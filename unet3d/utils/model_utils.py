@@ -6,7 +6,7 @@ from keras.models import model_from_json
 from keras.layers import Input, LeakyReLU, Add, UpSampling3D, Activation, SpatialDropout3D, Conv3D
 from keras.engine import Model
 from keras.optimizers import Adam, Adadelta
-
+from keras_contrib.layers.normalization.instancenormalization import InstanceNormalization
 from keras.losses import categorical_crossentropy
 
 from unet3d.metrics import weighted_dice_coefficient_loss
@@ -19,7 +19,7 @@ from unet3d.metrics import dice_coefficient_loss
 
 
 def load_model_multi_gpu(model_file):
-
+    from keras_contrib.layers.normalization.instancenormalization import InstanceNormalization
     print(">> load old model")
     model = load_old_model(model_file)
 

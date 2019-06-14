@@ -5,7 +5,7 @@ import argparse
 from unet3d.data import write_data_to_file
 from unet3d.utils.print_utils import print_separator, print_section
 
-from projects.headneck.config import config, config_dict
+from projects.miccai.config import config, config_dict
 from unet3d.utils.path_utils import get_project_dir, get_h5_training_dir
 from unet3d.utils.path_utils import get_training_h5_filename, get_shape_string, get_shape_from_string
 from unet3d.utils.utils import str2bool
@@ -60,7 +60,7 @@ def prepare_data(args):
     print("save to", data_file_path)
 
     #dataset = get_dataset(is_test=args.is_test, is_denoise=args.is_denoise)
-    dataset = "/media/guus/Secondary/Data_headneck_256_256_64"
+    dataset = "/media/guus/Secondary/MICCAI"
     print("reading folder:", dataset)
 
     if args.overwrite or not os.path.exists(data_file_path):
@@ -76,7 +76,7 @@ def prepare_data(args):
                            is_denoise=args.is_denoise)
 
 def main():
-    args = get_args.prepare_data_headneck()
+    args = get_args.prepare_data_miccai()
 
     args.is_test = "0"
     for is_denoise in ["0"]:

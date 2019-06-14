@@ -1,4 +1,4 @@
-from brats.config import config, config_unet, config_dict
+from projects.prostate.config import config, config_unet, config_dict
 from unet3d.utils.path_utils import make_dir
 from unet3d.utils.path_utils import get_filename_without_extension
 from unet3d.utils.path_utils import get_shape_from_string
@@ -71,7 +71,7 @@ def get_model_info_header(challenge, year, image_shape, is_bias_correction,
 
 def evaluate(args):
 
-    header = ("dice_WholeTumor", "dice_TumorCore", "dice_EnhancingTumor")
+    header = ("dice_Prostate", "dice_Bladder", "dice_Rectum")
     masking_functions = (get_whole_tumor_mask,
                          get_tumor_core_mask,
                          get_enhancing_tumor_mask)
@@ -97,14 +97,14 @@ def evaluate(args):
     config["input_shape"] = tuple(
         [config["nb_channels"]] + list(config["patch_shape"]))
 
-    prediction_dir = "/mnt/sda/3DUnetCNN_BRATS/brats"
+    prediction_dir = "/media/guus/Secondary/3DUnetCNN_BRATS/projects/prostate"
     # prediction_dir = BRATS_DIR
     config["prediction_folder"] = os.path.join(
         prediction_dir, "database/prediction", get_filename_without_extension(config["model_file"]))
 
-    name = get_filename_without_extension(config["model_file"]).replace("_aug-0", "")
+    name = get_filename_without_extension(config["model_file"])
     config["prediction_folder"] = os.path.join(
-        prediction_dir, "database/prediction/wo_augmentation", name)
+        prediction_dir, "database/prediction", name)
 
     if not os.path.exists(config["prediction_folder"]):
         print("model not exists. Please check")
@@ -119,9 +119,9 @@ def evaluate(args):
 
         if os.path.exists(config["prediction_df_csv"]):
             df = pd.read_csv(config["prediction_df_csv"])
-            df1 = df.dice_WholeTumor.T._values
-            df2 = df.dice_TumorCore.T._values
-            df3 = df.dice_EnhancingTumor.T._values
+            df1 = df.dice_Prostate.T._values
+            df2 = df.dice_Bladder.T._values
+            df3 = df.dice_Rectum.T._values
             rows = np.zeros((df1.size,3))
             rows[:,0] = df1
             rows[:,1] = df2
@@ -201,7 +201,7 @@ def plot_prediction(df):
 
 
 def main():
-    args = get_args.train()
+    args = get_args.train_prostate()
     overwrite = args.overwrite
     crop = args.crop
     challenge = args.challenge
@@ -221,33 +221,33 @@ def main():
     loss = args.loss
 
 
-    args.is_augment = "0"
+    args.is_augment = "1"
 
-    header = ("dice_WholeTumor", "dice_TumorCore", "dice_EnhancingTumor")
+    header = ("dice_Prostate", "dice_Bladder", "dice_Rectum")
     model_scores = list()
     model_ids = list()
 
-    for depth_unet in [4, 5]:
+    for depth_unet in [4]:
         args.depth_unet = depth_unet
-        for n_base_filters_unet in [16, 32]:
+        for n_base_filters_unet in [16]:
             args.n_base_filters_unet = n_base_filters_unet
-            for model_dim in [2, 3, 25]:
+            for model_dim in [3]:
                 args.model_dim = model_dim
                 # if depth_unet == 5 or n_base_filters_unet == 32:
                 #     list_model = config_dict["model_depth"]
                 # else:
                 list_model = config_dict["model"]
-                for model_name in list_model:
+                for model_name in ["unet"]:
                     args.model_name = model_name
-                    for is_normalize in config_dict["is_normalize"]:
+                    for is_normalize in ["z"]:
                         args.is_normalize = is_normalize
-                        for is_denoise in config_dict["is_denoise"]:
+                        for is_denoise in ["0"]:
                             args.is_denoise = is_denoise
-                            for is_hist_match in config_dict["hist_match"]:
+                            for is_hist_match in ["0"]:
                                 args.is_hist_match = is_hist_match
-                                for patch_shape in config_dict["patch_shape"]:
+                                for patch_shape in ["256-256-32"]:
                                     args.patch_shape = patch_shape
-                                    for loss in config_dict["loss"]:
+                                    for loss in ["weighted"]:
                                         args.loss = loss
                                         print("="*120)
                                         print(
@@ -274,12 +274,12 @@ def main():
                                                                         is_denoise, is_normalize, is_hist_match,
                                                                         model_name, model_dim, patch_shape, loss,
                                                                         depth_unet, n_base_filters_unet)
-                                            score = [np.mean(model_score["dice_WholeTumor"]),
+                                            score = [np.mean(model_score["dice_Prostate"]),
                                                      np.mean(
-                                                model_score["dice_TumorCore"]),
+                                                model_score["dice_Bladder"]),
                                                 np.mean(
-                                                model_score["dice_EnhancingTumor"]),
-                                                (np.mean(model_score["dice_WholeTumor"])+np.mean(model_score["dice_TumorCore"])+np.mean(model_score["dice_EnhancingTumor"]))/3]
+                                                model_score["dice_Rectum"]),
+                                                (np.mean(model_score["dice_Prostate"])+np.mean(model_score["dice_Bladder"])+np.mean(model_score["dice_Rectum"]))/3]
 
                                             row.extend(score)
                                             model_scores.append(row)
@@ -288,8 +288,8 @@ def main():
               "is_denoise", "is_normalize", "is_hist_match",
               "model_name", "model_dim", "depth_unet",
               "n_base_filters_unet", "loss", "patch_shape",
-              "dice_WholeTumor", "dice_TumorCore",
-              "dice_EnhancingTumor", "dice_Mean")
+              "dice_Prostate", "dice_Bladder",
+              "dice_Rectum", "dice_Mean")
 
     final_df = pd.DataFrame.from_records(
         model_scores, columns=header, index=model_ids)

@@ -89,7 +89,7 @@ def minh_dice_coef_loss(y_true, y_pred, labels=config["labels"], weights=[2, 1, 
     return distance
 
 
-def minh_dice_coef_metric(y_true, y_pred, labels=config["labels"], weights=[1, 1, 1, 1, 1, 1]):
+def minh_dice_coef_metric(y_true, y_pred, labels=config["labels"], weights=[1, 1, 1, 1, 1, 1, 1, 1, 1]):
     distance = 0
     for label in range(len(labels)):
         dice_coef_class = dice_coefficient(y_true[:, label], y_pred[:, label])
