@@ -4,13 +4,13 @@ import nibabel as nib
 import numpy as np
 import tables
 
-from .training import load_old_model
-from .utils import pickle_load
-from .utils.patches import reconstruct_from_patches, get_patch_from_3d_data, compute_patch_indices
-from .augment import permute_data, generate_permutation_keys, reverse_permute_data
+from unet3d.training import load_old_model
+from unet3d.utils import pickle_load
+from unet3d.utils.patches import reconstruct_from_patches25d, get_patch_from_3d_data, compute_patch_indices
+from unet3d.augment import permute_data, generate_permutation_keys, reverse_permute_data
 
 
-def patch_wise_prediction(model, data, overlap=0, batch_size=1, permute=False):
+def patch_wise_prediction(model, data, overlap=0, batch_size=64, permute=False):
     """
     :param batch_size:
     :param model:
@@ -19,10 +19,20 @@ def patch_wise_prediction(model, data, overlap=0, batch_size=1, permute=False):
     :return:
     """
     patch_shape = model.input_shape[-3:]
+    # if 3D and 2D
+    if patch_shape[-1] == data.shape[-1] or patch_shape[-1] == 1:
+        patch_overlap = 0
+    # if 2.5D
+    if patch_shape[-1] < data.shape[-1] and patch_shape[-1] != 1:
+
+        patch_overlap = [0, 0, patch_shape[-1]-1]
+    patch_overlap = np.asarray(patch_overlap)
     predictions = list()
     indices = compute_patch_indices(data.shape[-3:], patch_size=patch_shape,
-                                    overlap=overlap, is_extract_patch_agressive=False,
+                                    overlap=patch_overlap, is_extract_patch_agressive=True,
                                     is_predict=True)
+
+    indices = np.delete(indices, range(128, len(indices)), axis=0)
     batch = list()
     i = 0
     while i < len(indices):
@@ -37,7 +47,11 @@ def patch_wise_prediction(model, data, overlap=0, batch_size=1, permute=False):
             predictions.append(predicted_patch)
     # output_shape = [int(model.output.shape[1])] + list(data.shape[-3:])
     output_shape = [model.output_shape[1]] + list(data.shape[-3:])
-    return reconstruct_from_patches(predictions, patch_indices=indices, data_shape=output_shape)
+
+    for i in range(indices.shape[0]):
+        indices[i, 2] = indices[i, 2] + 3
+
+    return reconstruct_from_patches25d(predictions, patch_indices=indices, data_shape=output_shape)
 
 
 def get_prediction_labels(prediction, threshold=0.5, labels=None):
@@ -106,7 +120,8 @@ def multi_class_prediction(prediction, affine):
 
 
 def run_validation_case(data_index, output_dir, model, data_file, training_modalities,
-                        output_label_map=False, threshold=0.5, labels=None, overlap=0, permute=False):
+                        output_label_map=False, threshold=0.5, labels=None, overlap=0, permute=False,
+                        data_type_generator="combined"):
     """
     Runs a test case and writes predicted images to file.
     :param data_index: Index from of the list of test cases to get an image prediction from.
@@ -152,7 +167,8 @@ def run_validation_case(data_index, output_dir, model, data_file, training_modal
 
 
 def run_validation_cases(validation_keys_file, model_file, training_modalities, labels, hdf5_file,
-                         output_label_map=False, output_dir=".", threshold=0.5, overlap=0, permute=False, data_type_generator=None):
+                         output_label_map=False, output_dir=".", threshold=0.5, overlap=0, permute=False,
+                         data_type_generator="combined"):
     validation_indices = pickle_load(validation_keys_file)
 
     from unet3d.utils.model_utils import load_model_multi_gpu
@@ -169,7 +185,7 @@ def run_validation_cases(validation_keys_file, model_file, training_modalities, 
                 output_dir, "validation_case_{}".format(index))
         run_validation_case(data_index=index, output_dir=case_directory, model=model, data_file=data_file,
                             training_modalities=training_modalities, output_label_map=output_label_map, labels=labels,
-                            threshold=threshold, overlap=overlap, permute=permute)
+                            threshold=threshold, overlap=overlap, permute=permute, data_type_generator=data_type_generator)
     data_file.close()
 
 

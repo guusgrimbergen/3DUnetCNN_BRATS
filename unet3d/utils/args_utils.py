@@ -247,7 +247,7 @@ def train_ibsr():
                         default="0", choices=config_dict["is_bias_correction"],
                         help="perform bias field removal?")
     parser.add_argument('-dim', '--model_dim', type=int,
-                        default=3)                        
+                        default=3)
     args = parser.parse_args()
     return args
 
@@ -277,7 +277,37 @@ def train2d_ibsr():
                         default="0", choices=config_dict["is_bias_correction"],
                         help="perform bias field removal?")
     parser.add_argument('-dim', '--model_dim', type=int,
-                        default=2)                        
+                        default=2)
+    args = parser.parse_args()
+    return args
+
+
+def train25d_ibsr():
+    parent_parser = parent_train_parser()
+    parser = argparse.ArgumentParser(
+        parents=[parent_parser], description='Finetuning')
+    parser.add_argument('-c', '--challenge', type=str,
+                        default="ibsr", choices=config_dict["challenge"],
+                        help="challenge name")
+    parser.add_argument('-y', '--year', type=int,
+                        default=2018, choices=config_dict["year"],
+                        help="year of challenge")
+    parser.add_argument('-is', '--image_shape', type=str,
+                        default="256-128-256", choices=config_dict["image_shape"],
+                        help="image shape to read")
+    parser.add_argument('-ps', '--patch_shape', type=str,
+                        default="256-128-9",
+                        help="patch shape to train")
+    parser.add_argument('-ba', '--batch_size', type=int,
+                        default=64,
+                        help="train batch size")
+    parser.add_argument('-r', '--crop', type=str,
+                        default="0", choices=config_dict["crop"])
+    parser.add_argument('-b', '--is_bias_correction', type=str,
+                        default="0", choices=config_dict["is_bias_correction"],
+                        help="perform bias field removal?")
+    parser.add_argument('-dim', '--model_dim', type=int,
+                        default=25)
     args = parser.parse_args()
     return args
 
@@ -317,7 +347,7 @@ def train_headneck():
                         default="256-256-64", choices=config_dict["image_shape"],
                         help="image shape to read")
     parser.add_argument('-ps', '--patch_shape', type=str,
-                        default="128-128-128",
+                        default="256-256-32",
                         help="patch shape to train")
     parser.add_argument('-ba', '--batch_size', type=int,
                         default=1,
@@ -350,7 +380,7 @@ def train2d_headneck():
                         default="256-256-1",
                         help="patch shape to train")
     parser.add_argument('-ba', '--batch_size', type=int,
-                        default=32,
+                        default=8,
                         help="train batch size")
     parser.add_argument('-r', '--crop', type=str,
                         default="0", choices=config_dict["crop"])

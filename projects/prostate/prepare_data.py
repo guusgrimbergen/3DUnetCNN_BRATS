@@ -60,7 +60,7 @@ def prepare_data(args):
     print("save to", data_file_path)
 
     #dataset = get_dataset(is_test=args.is_test, is_denoise=args.is_denoise)
-    dataset = "/media/guus/Secondary/Data_prostate_256_256_128"
+    dataset = "/media/guus/Secondary/Data_subsubset"
     print("reading folder:", dataset)
 
     if args.overwrite or not os.path.exists(data_file_path):

@@ -64,7 +64,8 @@ def add_data_to_storage(data_storage, truth_storage, affine_storage, subject_dat
 def write_data_to_file(training_data_files, out_file, image_shape, brats_dir,
                        config, truth_dtype=np.uint8,
                        subject_ids=None, normalize=True, crop=True, is_normalize="z",
-                       is_hist_match="0", dataset="test", is_denoise="0"):
+                       is_hist_match="0", dataset="test", is_denoise="0",
+                       is_normalize_background=False):
     """
     Takes in a set of training images and writes those images to an hdf5 file.
     :param training_data_files: List of tuples containing the training data files. The modalities should be listed in
@@ -115,11 +116,13 @@ def write_data_to_file(training_data_files, out_file, image_shape, brats_dir,
                                config=config,
                                dataset=dataset,
                                is_normalize=is_normalize,
-                               is_hist_match=is_hist_match)
+                               is_hist_match=is_hist_match,
+                               is_normalize_background=is_normalize_background)
 
     hdf5_file.close()
     return out_file
 
 
 def open_data_file(filename, readwrite="r"):
+    # return tables.open_file(filename, readwrite, driver="H5FD_CORE")
     return tables.open_file(filename, readwrite)

@@ -17,6 +17,8 @@ from unet3d.metrics import tv_weighted_loss
 from unet3d.metrics import minh_dice_coef_metric
 from unet3d.metrics import dice_coefficient_loss
 
+from keras.utils.generic_utils import get_custom_objects
+get_custom_objects().update({'InstanceNormalization': InstanceNormalization})
 
 def load_model_multi_gpu(model_file):
     from keras_contrib.layers.normalization.instancenormalization import InstanceNormalization

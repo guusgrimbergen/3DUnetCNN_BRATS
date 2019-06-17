@@ -1,12 +1,8 @@
 import numpy as np
-
 from functools import partial
-
 from keras import backend as K
 from keras.losses import categorical_crossentropy
-
 from brats.config import config
-
 from unet3d.utils import metrics_utils as utils
 
 K.set_image_data_format("channels_first")
@@ -45,17 +41,46 @@ def weighted_dice_coefficient(y_true, y_pred, smooth=0.00001):
                                                                                axis=axis) + smooth))
 
 
-def weighted_dice_coefficient_old(y_true, y_pred, labels=config["labels"], weights=[1, 1, 1]):
-    distance = 0
-    for label in range(len(labels)):
-        dice_coef_class = dice_coefficient(y_true[:, label], y_pred[:, label])
-        dice_coef_class_weighted = dice_coef_class*weights[label]
-        distance = dice_coef_class_weighted + distance
-    return distance/3
-
-
 def weighted_dice_coefficient_loss(y_true, y_pred):
     return -weighted_dice_coefficient(y_true, y_pred)
+
+
+def weighted_dice_coefficient_new(labels=[1, 2, 4]):
+    def loss(y_true, y_pred):
+        distance = 0
+        for label in range(len(labels)):
+            dice_coef_class = dice_coefficient(
+                y_true[:, label], y_pred[:, label])
+            dice_coef_class_weighted = dice_coef_class
+            distance = dice_coef_class_weighted + distance
+        return distance/3
+    return loss
+
+
+def weighted_dice_coefficient_loss_new(labels=[1, 2, 4]):
+    def weighted_dice_coefficient_loss(y_true, y_pred):
+        distance = 0
+        for label in range(len(labels)):
+            dice_coef_class = dice_coefficient(
+                y_true[:, label], y_pred[:, label])
+            dice_coef_class_weighted = dice_coef_class
+            distance = dice_coef_class_weighted + distance
+        f_loss = -distance/len(labels)
+        return f_loss
+    return weighted_dice_coefficient_loss
+
+
+def minh_dice_coef_metric_new(labels=[1, 2, 4]):
+    def minh_dice_coef_metric(y_true, y_pred):
+        distance = 0
+        for label in range(len(labels)):
+            dice_coef_class = dice_coefficient(
+                y_true[:, label], y_pred[:, label])
+            dice_coef_class_weighted = dice_coef_class
+            distance = dice_coef_class_weighted + distance
+        f_loss = distance/len(labels)
+        return f_loss
+    return minh_dice_coef_metric
 
 
 def label_wise_dice_coefficient(y_true, y_pred, label_index):
@@ -89,7 +114,7 @@ def minh_dice_coef_loss(y_true, y_pred, labels=config["labels"], weights=[2, 1, 
     return distance
 
 
-def minh_dice_coef_metric(y_true, y_pred, labels=config["labels"], weights=[1, 1, 1, 1, 1, 1, 1, 1, 1]):
+def minh_dice_coef_metric(y_true, y_pred, labels=config["labels"], weights=[2, 1, 3]):
     distance = 0
     for label in range(len(labels)):
         dice_coef_class = dice_coefficient(y_true[:, label], y_pred[:, label])
@@ -175,18 +200,15 @@ def soft_dice_loss(y_true, y_pred, epsilon=1e-6):
     ''' 
     Soft dice loss calculation for arbitrary batch size, number of classes, and number of spatial dimensions.
     Assumes the `channels_last` format.
-
     # Arguments
         y_true: b x X x Y( x Z...) x c One hot encoding of ground truth
         y_pred: b x X x Y( x Z...) x c Network output, must sum to 1 over c channel (such as after softmax) 
         epsilon: Used for numerical stability to avoid divide by zero errors
-
     # References
         V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation 
         https://arxiv.org/abs/1606.04797
         More details on Dice loss formulation 
         https://mediatum.ub.tum.de/doc/1395260/1395260.pdf (page 72)
-
         Adapted from https://github.com/Lasagne/Recipes/issues/99#issuecomment-347775022
     '''
 
@@ -275,6 +297,12 @@ def tv_weighted_loss(alpha=0.1):
     def loss(y_true, y_pred):
         return alpha*tv_ndim_loss(y_pred) + weighted_dice_coefficient_loss(y_true, y_pred)
     return loss
+
+
+# def tv_weighted_loss(alpha=0.1):
+#     def loss(y_true, y_pred):
+#         return alpha*tv_ndim_loss(y_pred) + weighted_dice_coefficient_loss(y_true, y_pred)
+#     return loss
 
 
 def cacaded_weighted_dice_coefficient_loss(y_pred, y_true, smooth=0.00001):

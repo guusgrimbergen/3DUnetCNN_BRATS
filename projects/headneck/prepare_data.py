@@ -73,7 +73,9 @@ def prepare_data(args):
                            crop=str2bool(args.crop),
                            is_normalize=args.is_normalize,
                            is_hist_match=args.is_hist_match,
-                           is_denoise=args.is_denoise)
+                           is_denoise=args.is_denoise,
+                           is_normalize_background=True)
+
 
 def main():
     args = get_args.prepare_data_headneck()
@@ -85,12 +87,11 @@ def main():
             args.is_normalize = is_normalize
             for is_hist_match in ["0"]:
                 args.is_hist_match = is_hist_match
-                if is_normalize == "z" and is_hist_match == "1":
-                    continue
-                else:
-                    print(">> prepare data {} {} {}".format(
-                        is_denoise, is_normalize, is_hist_match))
-                    prepare_data(args)
+
+                print(">> prepare data {} {} {}".format(
+                    is_denoise, is_normalize, is_hist_match))
+                prepare_data(args)
+
 
 if __name__ == "__main__":
     main()

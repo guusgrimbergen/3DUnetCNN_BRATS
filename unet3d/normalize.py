@@ -9,12 +9,11 @@ from skimage import exposure
 
 from .utils import crop_img, crop_img_to, read_image
 
-from unet3d.utils.utils import resize, read_image_files
+from unet3d.utils.utils import resize, read_image_files, save_nib
 from unet3d.utils.path_utils import get_template_path
-
 from unet3d.utils.volume import get_background_mask
-
 from unet3d.utils.utils import str2bool
+import unet3d.utils.print_utils as print_utils
 
 
 def find_downsized_info(training_data_files, input_shape):
@@ -140,18 +139,33 @@ def hist_match(source, template):
 
 def normalize_volume(source, template,
                      is_normalize="z",
-                     is_hist_match="0"):
-    # set negative to 0
-    source[source < 0] = 0
-    template[template < 0] = 0
+                     is_hist_match="0",
+                     is_normalize_background=False):
+
+    if np.min(source)<0:
+        minimum=-1024
+    else:
+        minimum=np.min(source)
+    
+    source[source<minimum]=minimum
+    template[template<minimum]=minimum
+
+    # set min to 0
+    source = source - minimum
+    template = template - minimum
 
     # reshape to 1d
     source_1d = source.reshape((source.size))
     template_1d = template.reshape((template.size))
 
-    # extract index
-    idx_source = np.argwhere(source_1d > 0)
-    idx_template = np.argwhere(template_1d > 0)
+    if is_normalize_background:
+        # extract index
+        idx_source = np.argwhere(source_1d >= -1)
+        idx_template = np.argwhere(template_1d >= -1)
+    else:
+        # extract index
+        idx_source = np.argwhere(source_1d > 0)
+        idx_template = np.argwhere(template_1d > 0)
 
     # get array
     source_norm_array = np.ndarray.take(source, idx_source)
@@ -185,10 +199,11 @@ def normalize_volume(source, template,
 def normalize_data(data, data_paths, brats_dir, config,
                    dataset="test",
                    is_normalize="z",
-                   is_hist_match="0"):
+                   is_hist_match="0",
+                   is_normalize_background=False):
 
     for i in range(data.shape[0]):
-        volume = data[i, :, :, :]
+        volume = data[i, :, :, :].copy()
         data_path = data_paths[i]
         template_path = get_template_path(
             path=data_path, dataset=dataset, brats_dir=brats_dir,
@@ -196,25 +211,30 @@ def normalize_data(data, data_paths, brats_dir, config,
             template_folder=config["template_folder"])
 
         template = nib.load(template_path)
-
-        # affine = template.affine
-        # save_nib(volume, temp_volume_path, affine)
+        affine = template.affine
 
         template = template.get_data()
         volume_normalized = normalize_volume(volume, template,
                                              is_normalize=is_normalize,
-                                             is_hist_match=is_hist_match)
+                                             is_hist_match=is_hist_match,
+                                             is_normalize_background=is_normalize_background)
         data[i, :, :, :] = volume_normalized
 
-        # save_nib(template, temp_template_path, affine)
-        # save_nib(volume_normalized, temp_volume_norm_path, affine)
-        # save_nib(volume_normalized-volume, temp_diff_path, affine)
+
+        temp_path = "/media/guus/Secondary/3DUnetCNN_BRATS/projects/headneck/database/temp"
+        
+        save_nib(volume, temp_path + "/ct.nii.gz", affine)
+        save_nib(template, temp_path + "/template.nii.gz", affine)
+        save_nib(volume_normalized, temp_path + "/norm.nii.gz", affine)
+        # save_nib(volume_normalized-volume, temp_path + "/ct.nii.gz", affine)
     return data
 
 
 def normalize_data_storage(data_storage, training_data_files, brats_dir, config,
-                           dataset="original", is_normalize="z", is_hist_match="0"):
+                           dataset="original", is_normalize="z", is_hist_match="0",
+                           is_normalize_background=False):
     for index in range(data_storage.shape[0]):
+        print("Normalizing {}/{}".format(index+1, data_storage.shape[0]))
         data_paths = training_data_files[index]
         data_storage[index] = normalize_data(data_storage[index],
                                              data_paths,
@@ -222,5 +242,6 @@ def normalize_data_storage(data_storage, training_data_files, brats_dir, config,
                                              config=config,
                                              dataset=dataset,
                                              is_normalize=is_normalize,
-                                             is_hist_match=is_hist_match)
+                                             is_hist_match=is_hist_match,
+                                             is_normalize_background=is_normalize_background)
     return data_storage

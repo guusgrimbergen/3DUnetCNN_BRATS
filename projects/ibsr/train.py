@@ -7,8 +7,8 @@ import unet3d.utils.path_utils as path_utils
 import unet3d.utils.print_utils as print_utils
 from unet3d.training import train_model
 from unet3d.model import *
-# from unet3d.generator import get_training_and_validation_and_testing_generators
-from engine.generator import get_training_and_validation_and_testing_generators3d
+from unet3d.generator import get_training_and_validation_and_testing_generators
+#from engine.generator import get_training_and_validation_and_testing_generators3d
 from unet3d.data import open_data_file
 
 import os
@@ -45,7 +45,7 @@ def train(args):
     data_file_opened = open_data_file(config["data_file"])
 
     print_utils.print_section("get training and testing generators")
-    train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_and_testing_generators3d(
+    train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_and_testing_generators(
         data_file_opened,
         batch_size=args.batch_size,
         validation_batch_size=args.batch_size,
@@ -77,7 +77,7 @@ def train(args):
         print("load old model")
         from unet3d.utils.model_utils import generate_model
         model = generate_model(
-            config["model_file"], loss_function=args.loss, labels=config["labels"])
+            config["model_file"], loss_function=args.loss)
         # model = load_old_model(config["model_file"])
     else:
         # instantiate new model
@@ -90,8 +90,7 @@ def train(args):
                                   deconvolution=config["deconvolution"],
                                   depth=args.depth_unet,
                                   n_base_filters=args.n_base_filters_unet,
-                                  loss_function=args.loss,
-                                  labels=config["labels"])
+                                  loss_function=args.loss)
         elif args.model == "segnet":
             print("init segnet model")
             model = segnet3d(input_shape=config["input_shape"],
@@ -100,8 +99,7 @@ def train(args):
                              initial_learning_rate=config["initial_learning_rate"],
                              depth=args.depth_unet,
                              n_base_filters=args.n_base_filters_unet,
-                             loss_function=args.loss,
-                             labels=config["labels"])
+                             loss_function=args.loss)
         else:
             raise ValueError("Model is NotImplemented. Please check")
 
@@ -142,11 +140,7 @@ def train(args):
                 learning_rate_drop=config["learning_rate_drop"],
                 learning_rate_patience=config["patience"],
                 early_stopping_patience=config["early_stop"],
-                n_epochs=config["n_epochs"],
-                workers=1,
-                max_queue_size=2,
-                use_multiprocessing=False
-                )
+                n_epochs=config["n_epochs"])
 
     if args.is_test == "0":
         experiment.log_parameters(config)

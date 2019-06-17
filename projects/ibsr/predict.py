@@ -10,7 +10,7 @@ from unet3d.utils.path_utils import get_shape_from_string
 from unet3d.utils.path_utils import get_filename_without_extension
 from unet3d.utils.path_utils import make_dir
 
-from brats.config import config, config_unet, config_dict
+from projects.ibsr.config import config, config_unet, config_dict
 config.update(config_unet)
 
 
@@ -30,11 +30,14 @@ def is_all_cases_predicted(prediction_folder, testing_file):
             glob.glob(os.path.join(config["prediction_folder"], "*")))
         return num_cases == num_predicted
 
+
 list_already_predicted = list()
 
-def predict(args):
 
-    data_path, trainids_path, validids_path, testids_path, model_path = get_training_h5_paths(BRATS_DIR, args)
+def predict(args, prediction_dir="desktop"):
+
+    data_path, trainids_path, validids_path, testids_path, model_path = get_training_h5_paths(
+        brats_dir=BRATS_DIR, args=args)
 
     if not os.path.exists(model_path):
         print("model not exists. Please check")
@@ -48,12 +51,14 @@ def predict(args):
         config["input_shape"] = tuple(
             [config["nb_channels"]] + list(config["patch_shape"]))
 
-        prediction_dir = "/mnt/sda/3DUnetCNN_BRATS/projects/ibsr"
-        # prediction_dir = BRATS_DIR
+        if prediction_dir == "SERVER":
+            prediction_dir = "projects/ibsr"
+        else:
+            prediction_dir = "/media/guus/Secondary/3DUnetCNN_BRATS/projects/ibsr"
+
         config["prediction_folder"] = os.path.join(
             prediction_dir, "database/prediction", get_filename_without_extension(config["model_file"]))
 
-        
         if is_all_cases_predicted(config["prediction_folder"], config["testing_file"]):
             print("Already predicted. Skip...")
             list_already_predicted.append(config["prediction_folder"])
@@ -76,11 +81,11 @@ def predict(args):
                     "can not find model {}. Please check".format(config["model_file"]))
 
             if args.model_dim == 3:
-                from unet3d.prediction import run_validation_cases
+                from projects.ibsr.prediction import run_validation_cases
             elif args.model_dim == 25:
-                from unet25d.prediction import run_validation_cases
+                from projects.ibsr.prediction import run_validation_cases
             elif args.model_dim == 2:
-                from unet2d.prediction import run_validation_cases
+                from projects.ibsr.prediction import run_validation_cases
             else:
                 raise ValueError(
                     "dim {} NotImplemented error. Please check".format(args.model_dim))
@@ -91,41 +96,62 @@ def predict(args):
                                  labels=config["labels"],
                                  hdf5_file=config["data_file"],
                                  output_label_map=True,
-                                 output_dir=config["prediction_folder"])
+                                 output_dir=config["prediction_folder"],
+                                 data_type_generator=args.data_type_generator)
 
 
 def main():
-    args = get_args.train_ibsr()
+    args = get_args.train25d_ibsr()
 
-    
-    for model_dim in [2]:
-        args.model_dim = model_dim               
-        for model in ["unet", "isensee"]:
-            args.model = model
-            for is_normalize in config_dict["is_normalize"]:
-                args.is_normalize = is_normalize
-                for is_denoise in config_dict["is_denoise"]:
-                    args.is_denoise = is_denoise
-                    for is_hist_match in config_dict["hist_match"]:
+    depth_unet = args.depth_unet
+    n_base_filters_unet = args.n_base_filters_unet
+    patch_shape = args.patch_shape
+    is_hist_match = args.is_hist_match
+    loss = args.loss
+
+    header = ("dice_CSF", "dice_GrayMatter","dice_WhiteMatter")
+    model_scores = list()
+    model_ids = list()
+
+    for is_augment in ["1"]:
+        args.is_augment = is_augment
+        for model_name in ["unet", "segnet"]:
+            # for model_name in ["unet"]:
+            args.model = model_name
+            for is_denoise in ["0"]:
+                args.is_denoise = is_denoise
+                for is_normalize in ["z"]:
+                    args.is_normalize = is_normalize
+                    for is_hist_match in ["0"]:
                         args.is_hist_match = is_hist_match
-                        for patch_shape in ["32-32-1", "256-128-1"]:
-                            args.patch_shape = patch_shape
-                            for loss in ["weighted"]:
-                                args.loss = loss
+                        for loss in ["weighted"]:
+                            args.loss = loss
+                            for patch_shape in ["256-128-3", "256-128-5", "256-128-7", 
+                                                "256-128-9", "256-128-11"]:
+                                args.patch_shape = patch_shape
+                                args.model_dim = 25
+
+                                if "casnet" in args.model:
+                                    args.data_type_generator = 'cascaded'
+                                elif "sepnet" in args.model:
+                                    args.data_type_generator = 'separated'
+                                else:
+                                    args.data_type_generator = 'combined'
+
                                 print("="*120)
                                 print(
                                     ">> processing model-{}{}, depth-{}, filters-{}, patch_shape-{}, is_denoise-{}, is_normalize-{}, is_hist_match-{}, loss-{}".format(
-                                        args.model,
+                                        model_name,
                                         args.model_dim,
-                                        args.depth_unet,
-                                        args.n_base_filters_unet,
-                                        args.patch_shape,
-                                        args.is_denoise,
-                                        args.is_normalize,
-                                        args.is_hist_match,
-                                        args.loss))
+                                        depth_unet,
+                                        n_base_filters_unet,
+                                        patch_shape,
+                                        is_denoise,
+                                        is_normalize,
+                                        is_hist_match,
+                                        loss))
                                 is_test = "0"
-                                predict(args)
+                                predict(args, prediction_dir="SERVER")
                                 # print("="*60)
                                 print(">> finished")
                                 print("="*120)
@@ -133,9 +159,9 @@ def main():
                                 from keras import backend as K
                                 K.clear_session()
 
-
     print(list_already_predicted)
     print(len(list_already_predicted))
+
 
 if __name__ == "__main__":
     main()

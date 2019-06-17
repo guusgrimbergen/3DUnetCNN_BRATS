@@ -123,12 +123,12 @@ def train(args):
     print("-"*60)
     # run training
 
-    if args.is_test == "0":
-        experiment = Experiment(api_key="34T3kJ5CkXUtKAbhI6foGNFBL",
-                                project_name="train",
-                                workspace="guusgrimbergen")
-    else:
-        experiment = None
+    # if args.is_test == "0":
+    #     experiment = Experiment(api_key="34T3kJ5CkXUtKAbhI6foGNFBL",
+    #                             project_name="train",
+    #                             workspace="guusgrimbergen")
+    # else:
+    experiment = None
 
     print(config["initial_learning_rate"], config["learning_rate_drop"])
     print("data file:", config["data_file"])
