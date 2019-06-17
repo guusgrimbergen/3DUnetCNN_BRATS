@@ -78,7 +78,7 @@ def segnet3d(input_shape, n_labels, n_base_filters=16, depth=4, pool_size=(2, 2,
 
 def main():
 
-    model = SegNet3D(input_shape=(1, 128, 128, 128),
+    model = segnet3d(input_shape=(1, 128, 128, 128),
                      n_labels=3)
     model.summary()
 
