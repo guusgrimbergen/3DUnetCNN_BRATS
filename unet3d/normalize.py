@@ -221,11 +221,11 @@ def normalize_data(data, data_paths, brats_dir, config,
         data[i, :, :, :] = volume_normalized
 
 
-        temp_path = "/media/guus/Secondary/3DUnetCNN_BRATS/projects/headneck/database/temp"
+        #temp_path = "/media/guus/Secondary/3DUnetCNN_BRATS/projects/headneck/database/temp"
         
-        save_nib(volume, temp_path + "/ct.nii.gz", affine)
-        save_nib(template, temp_path + "/template.nii.gz", affine)
-        save_nib(volume_normalized, temp_path + "/norm.nii.gz", affine)
+        # save_nib(volume, temp_path + "/ct.nii.gz", affine)
+        # save_nib(template, temp_path + "/template.nii.gz", affine)
+        # save_nib(volume_normalized, temp_path + "/norm.nii.gz", affine)
         # save_nib(volume_normalized-volume, temp_path + "/ct.nii.gz", affine)
     return data
 
